@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
+    <title>스파르타코딩클럽 | Week2 과제</title>
+    <style>
+        .item {
+            width: 400px;
+            height: 300px;
+
+            /* background-position: center;
+            background-size: cover; */
+
+            color: black;
+            text-align: center;
+        }
+
+        .item-bg {
+            width: 400px;
+            height: 300px;
+
+            background-color: beige;
+        }
+
+        .wrap {
+            width: 400px;
+            margin: 20px auto;
+        }
+
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            font-weight: bold;
+        }
+
+        .wrap1 {
+            margin: 40px;
+        }
+
+        .button {
+            margin: 20px auto;
+        }
+
+        .wrap2 {
+            margin: 30px;
+            padding-left: 110px;
+        }
+
+        .hr {
+            border: solid 2px;
+        }
+
+        .button {
+            transition-duration: 0.4s;
+        }
+
+        .button:hover {
+            /* background-color: white; */
+            color: white;
+        }
+
+        .dollar {
+            color: "blue"
+        }
+    </style>
+
+    <script>
+        function orderNow() {
+            let name = $('#info1').val();
+            let count = $('exampleFormControlSelect1').val();
+            let phone = $('#info2').val();
+            let email = $('#info3').val();
+            if ('' == name) {
+                alert('이름을 입력하세요!');
+            } else if ('' == phone) {
+                alert('휴대폰을 입력하세요!');
+            } else if ('' == email) {
+                alert('이메일을 입력하세요!');
+            } else {
+                alert('주문완료되었습니다 :)');
+            }
+
+        $.ajax({
+                type: 'POST', // 타입을 작성합니다.
+                url: '/myshop', // url을 작성합니다.
+                data: {
+                    'info1':info1,
+                    'exampleFormControlSelect1':exampleFormControlSelect1,
+                    'info2':info2,
+                    'info3':info3
+                }, // data를 작성합니다. },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    }
+                }
+            });  
+        }
+
+     
+        $(document).ready(function () {
+            $('#orders-box').html('');
+            listing();
+            // 환율 API
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    /*let currency_rate = response[1];
+                    let dollar_rate = currency_rate["rate"];*/
+
+                    for (let i = 0; i < response.length; i++) {
+                        let data = response[i];
+                        if ('USDKRW=X' == data.name) {
+                            let dollar_rate = data.rate
+                            let temp_html = `${dollar_rate}`;
+                            $('#dollar_rate').text(temp_html);
+                            break;
+                        }
+                    }
+                },
+            });
+        });
+
+        function listing() {
+            // 1. 리뷰 목록을 서버에 요청하기
+            // 2. 요청 성공 여부 확인하기
+            // 3. 요청 성공했을 때 리뷰를 올바르게 화면에 나타내기
+            $.ajax({
+                type: "GET",
+                url: "/myshop",
+                data: {},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        // 2. 성공했을 때 리뷰를 올바르게 화면에 나타내기
+                        let myshop = response['myshop'];
+                        console.log(myshop);
+
+                        for (let shop of myshop) {
+                            $('#orders-box').append(`
+                                <tr>
+                                    <td>${shop.info1}</td>
+                                    <td>${shop.exampleFormControlSelect1}</td>
+                                    <td>${shop.info2}</td>
+                                    <td>${shop.info3}</td>
+                                </tr>
+                            `)
+                        }
+                    } else {
+                        alert('주문정보를 받아오지 못했습니다');
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+
+<body onload="">
+    <div class="wrap">
+        <!-- 상품 사진 -->
+        <div id="carouselExampleIndicators" class="carousel slide item-bg" data-ride="carousel">
+            <ol class="carousel-indicators">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner item">
+                <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='moleskine3.jpg') }}" class="d-block w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='moleskine2.jpg') }}" class="d-block w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='moleskine1.jpg') }}" class="d-block w-100" alt="...">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+
+        <!-- 상품 정보 -->
+        <div class="wrap1">
+            <h6 style="color:gray">상품 정보</h6>
+            <hr class="hr">
+            <div>
+                <p>Moleskine Classic (Lavender)</p>
+                <p><del style="color:gray">33000원</del>→ 20,900원</p>
+                <!-- 환율 정보 -->
+                <div>
+                    <span id="dollar_won" class="dollar">달러-원 환율:</span> <span id="dollar_rate"></span>
+                </div>
+                <div class="form-group count">
+                    <label for="exampleFormControlSelect1">수량</label>
+                    <select class="form-control" id="exampleFormControlSelect1">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 주문자 정보 -->
+        <div id="customer-info" class="wrap1">
+            <h6 style="color:gray">주문자 정보</h6>
+            <hr class="hr">
+            <div>
+                <p>주문자 성함＊: <input id="info1" type="text" /></p>
+            </div>
+            <div>
+                <p>휴대폰＊: <input id="info2" type="text" placeholder="010-****-****" /></p>
+            </div>
+            <div>
+                <p>이메일＊: <input id="info3" type="text" /></p>
+            </div>
+        </div>
+
+        <!-- 주문 완료 버튼 -->
+        <div class="wrap2">
+            <button onclick="orderNow()" type="button" class="btn btn-primary button">지금 주문하기</button>
+        </div>
+
+        <!-- 주문자 리스트 -->
+        <div class="orders">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">이름</th>
+                        <th scope="col">수량</th>
+                        <th scope="col">휴대폰</th>
+                        <th scope="col">이메일</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-box">
+                    <tr>
+                        <td>Otto</td>
+                        <td>@mdo</td>
+                        <td>@mdo</td>
+                        <td>otto</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+
+    </div>
+
+
+</body>
+
+</html>
